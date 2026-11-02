@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Status__c</fullName>
+    <description>Placed &gt; Roasting &gt; Shipped &gt; Delivered, or Cancelled.</description>
+    <externalId>false</externalId>
+    <label>Status</label>
+    <required>false</required>
+    <trackHistory>true</trackHistory>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Placed</fullName>
+                <default>false</default>
+                <label>Placed</label>
+            </value>
+            <value>
+                <fullName>Roasting</fullName>
+                <default>false</default>
+                <label>Roasting</label>
+            </value>
+            <value>
+                <fullName>Shipped</fullName>
+                <default>false</default>
+                <label>Shipped</label>
+            </value>
+            <value>
+                <fullName>Delivered</fullName>
+                <default>false</default>
+                <label>Delivered</label>
+            </value>
+            <value>
+                <fullName>Cancelled</fullName>
+                <default>false</default>
+                <label>Cancelled</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

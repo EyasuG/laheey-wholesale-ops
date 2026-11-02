@@ -1,0 +1,21 @@
+<template>
+    <lightning-card title={title} icon-name="custom:custom13">
+        <div class="slds-p-horizontal_medium slds-p-bottom_small slds-text-body_small slds-text-color_weak">
+            {summaryText}
+        </div>
+        <div class="table">
+            <lightning-datatable
+                key-field="Id"
+                data={rows}
+                columns={columns}
+                hide-checkbox-column
+                enable-infinite-loading={hasMore}
+                onloadmore={loadMore}
+                load-more-offset="20">
+            </lightning-datatable>
+        </div>
+        <template lwc:if={error}>
+            <p class="slds-p-around_medium slds-text-color_error">{error}</p>
+        </template>
+    </lightning-card>
+</template>

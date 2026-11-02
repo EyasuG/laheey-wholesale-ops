@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  warehouse:
+    name: Generator + API tests (real Postgres)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: laheey
+          POSTGRES_PASSWORD: laheey
+          POSTGRES_DB: warehouse
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U laheey" --health-interval 5s --health-retries 10
+    env:
+      DATABASE_URL: postgres://laheey:laheey@localhost:5432/warehouse
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Load a small warehouse
+        run: node generator/generate.js --scale tiny --as-of 2026-10-28
+      - run: npm test
+
+  salesforce:
+    name: Deploy + Apex tests in a scratch org
+    runs-on: ubuntu-latest
+    # Runs only after you add the SF_JWT_KEY, SF_CLIENT_ID and SF_USERNAME secrets (docs/LEVELS.md, Level 8)
+    if: ${{ vars.ENABLE_SALESFORCE_CI == 'true' }}
+    defaults:
+      run:
+        working-directory: salesforce
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm install --global @salesforce/cli
+      - name: Authenticate the Dev Hub
+        run: |
+          echo "${{ secrets.SF_JWT_KEY }}" > server.key
+          sf org login jwt --client-id ${{ secrets.SF_CLIENT_ID }} --jwt-key-file server.key --username ${{ secrets.SF_USERNAME }} --set-default-dev-hub --alias devhub
+      - run: sf org create scratch --definition-file config/project-scratch-def.json --alias ci --duration-days 1 --set-default --wait 10
+      - run: sf project deploy start --target-org ci
+      - run: sf apex run test --target-org ci --code-coverage --result-format human --wait 20 --test-level RunLocalTests
+      - if: always()
+        run: sf org delete scratch --target-org ci --no-prompt

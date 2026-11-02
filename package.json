@@ -1,0 +1,22 @@
+{
+  "name": "laheey-wholesale-ops",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Salesforce developer portfolio project: 1-10M row coffee wholesale warehouse synced into Salesforce with Apex, LWC and Agentforce.",
+  "license": "MIT",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "generate": "node generator/generate.js",
+    "generate:s": "node generator/generate.js --scale s",
+    "generate:m": "node generator/generate.js --scale m",
+    "generate:l": "node generator/generate.js --scale l",
+    "api": "node api/server.js",
+    "export:subset": "node scripts/export-subset.js",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "express": "4.21.2",
+    "pg": "8.13.1",
+    "pg-copy-streams": "6.0.6"
+  }
+}

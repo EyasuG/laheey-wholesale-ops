@@ -1,0 +1,11 @@
+node_modules/
+data/
+exports/
+.env
+.sf/
+.sfdx/
+salesforce/.sf/
+salesforce/.sfdx/
+salesforce/.localdevserver/
+*.log
+.DS_Store

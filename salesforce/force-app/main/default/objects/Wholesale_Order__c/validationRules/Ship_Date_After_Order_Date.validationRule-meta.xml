@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Ship_Date_After_Order_Date</fullName>
+    <active>true</active>
+    <description>An order can't ship before it was placed.</description>
+    <errorConditionFormula>AND(NOT(ISBLANK(Ship_Date__c)), Ship_Date__c &lt; Order_Date__c)</errorConditionFormula>
+    <errorDisplayField>Ship_Date__c</errorDisplayField>
+    <errorMessage>Ship date can't be before the order date.</errorMessage>
+</ValidationRule>
