@@ -30,12 +30,16 @@ private class WholesaleOrderTriggerTest {
 
     @IsTest
     static void blocksBackwardStatusChanges() {
-        Account a = [SELECT Id FROM Account LIMIT 1];
-        Wholesale_Order__c o = TestDataFactory.orders(a.Id, 1, 'Delivered')[0];
-        o.Status__c = 'Placed';
-        Database.SaveResult sr = Database.update(o, false);
-        Assert.isFalse(sr.isSuccess(), 'Delivered orders cannot go back to Placed');
-        Assert.isTrue(sr.getErrors()[0].getMessage().contains('Delivered to Placed'), sr.getErrors()[0].getMessage());
+        // Run as an ops user: the admin may hold the integration bypass, which would skip the rule under test
+        System.runAs(TestDataFactory.opsUser()) {
+            Account a = new Account(Name = 'Ops Test Cafe');
+            insert a;
+            Wholesale_Order__c o = TestDataFactory.orders(a.Id, 1, 'Delivered')[0];
+            o.Status__c = 'Placed';
+            Database.SaveResult sr = Database.update(o, false);
+            Assert.isFalse(sr.isSuccess(), 'Delivered orders cannot go back to Placed');
+            Assert.isTrue(sr.getErrors()[0].getMessage().contains('Delivered to Placed'), sr.getErrors()[0].getMessage());
+        }
     }
 
     @IsTest

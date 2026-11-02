@@ -40,6 +40,26 @@ public class TestDataFactory {
         return rows;
     }
 
+    /**
+     * A sales/ops user with Laheey_Wholesale_Ops only. Use with System.runAs when a test needs the
+     * business rules enforced: the admin running tests may also hold Laheey_Integration, whose
+     * Bypass_Order_Status_Rules custom permission switches the status rule off.
+     */
+    public static User opsUser() {
+        Profile p = [SELECT Id FROM Profile WHERE Name = 'Standard User' LIMIT 1];
+        String unique = String.valueOf(Crypto.getRandomInteger()).replace('-', '') + '@laheey.test';
+        User u = new User(
+            ProfileId = p.Id, Username = 'ops' + unique, Email = 'ops' + unique, LastName = 'Ops', Alias = 'lops',
+            TimeZoneSidKey = 'America/New_York', LocaleSidKey = 'en_US', EmailEncodingKey = 'UTF-8', LanguageLocaleKey = 'en_US'
+        );
+        insert u;
+        insert new PermissionSetAssignment(
+            AssigneeId = u.Id,
+            PermissionSetId = [SELECT Id FROM PermissionSet WHERE Name = 'Laheey_Wholesale_Ops' LIMIT 1].Id
+        );
+        return u;
+    }
+
     /** Six months of metrics: the three older months at priorRevenue, the three recent ones at recentRevenue. */
     public static void metrics(Id accountId, Decimal recentRevenue, Decimal priorRevenue) {
         List<Account_Metric__c> rows = new List<Account_Metric__c>();

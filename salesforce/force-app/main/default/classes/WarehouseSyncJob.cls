@@ -116,13 +116,12 @@ public with sharing class WarehouseSyncJob implements Queueable, Database.Allows
     private static List<Account> toAccounts(List<WarehouseClient.AccountDto> dtos) {
         List<Account> rows = new List<Account>();
         for (WarehouseClient.AccountDto d : dtos) {
-            rows.add(new Account(
+            Account a = new Account(
                 Warehouse_Id__c = d.warehouseId,
                 Name = d.name,
                 Segment__c = d.segment,
                 Tier__c = d.tier,
                 BillingCity = d.city,
-                BillingState = d.state,
                 Sales_Rep__c = d.salesRep,
                 Payment_Terms__c = d.paymentTerms,
                 Lifetime_Revenue__c = d.lifetimeRevenue,
@@ -131,9 +130,29 @@ public with sharing class WarehouseSyncJob implements Queueable, Database.Allows
                 Last_Order_Date__c = d.lastOrderDate,
                 Open_Cases__c = d.openCases,
                 Last_Synced__c = System.now()
-            ));
+            );
+            setUsAddress(a, d.state);
+            rows.add(a);
         }
         return rows;
+    }
+
+    // The warehouse sends US state codes ("DC"). Orgs with State and Country/Territory Picklists
+    // (the default for new orgs) reject a state without a country and want the code fields;
+    // older orgs only have the text fields. put() keeps this compiling in both.
+    private static final Boolean STATE_PICKLISTS = Schema.SObjectType.Account.fields.getMap().containsKey('billingstatecode');
+
+    private static void setUsAddress(Account a, String stateCode) {
+        if (String.isBlank(stateCode)) {
+            return;
+        }
+        if (STATE_PICKLISTS) {
+            a.put('BillingCountryCode', 'US');
+            a.put('BillingStateCode', stateCode);
+        } else {
+            a.BillingCountry = 'US';
+            a.BillingState = stateCode;
+        }
     }
 
     private static List<Contact> toContacts(List<WarehouseClient.ContactDto> dtos) {

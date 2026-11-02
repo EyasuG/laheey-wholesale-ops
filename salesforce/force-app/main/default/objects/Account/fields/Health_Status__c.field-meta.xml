@@ -5,7 +5,7 @@
     <externalId>false</externalId>
     <label>Health Status</label>
     <required>false</required>
-    <trackHistory>true</trackHistory>
+    <trackHistory>false</trackHistory>
     <type>Picklist</type>
     <valueSet>
         <restricted>true</restricted>

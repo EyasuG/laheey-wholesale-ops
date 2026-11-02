@@ -25,6 +25,18 @@ The Apex was syntax-checked and the project converts cleanly with the Salesforce
 
 Read the whole error before changing anything, fix one thing, redeploy. Keep notes: this is good interview material.
 
+### First live deploy (Agentforce Developer Edition, API 68.0)
+
+What actually broke on the first deploy to a real org, and the fix that's now in the code:
+
+| Message | Cause | Fix |
+|---|---|---|
+| `The entity: Account does not have history tracking enabled` | `Health_Status__c` had `trackHistory` on, but Account history is off in a new org. | Set `trackHistory` to false. To keep a history, enable Account field history in Setup first, then turn it back on. |
+| `Permission Read Account_Metric__c depends on permission(s): Read Account` | Wholesale Order and Account Metric are master-detail children of Account; a permission set can't grant a child without the parent. | Both permission sets now grant Account and Contact (Integration: create/read/edit; Ops: read/edit). |
+| Sync test: `Two valid accounts land: Expected 2, Actual 0` | New orgs have State and Country/Territory Picklists on: `BillingState = 'DC'` with no country fails every row (`FIELD_INTEGRITY_EXCEPTION`). | `WarehouseSyncJob.setUsAddress` sets `BillingCountryCode`/`BillingStateCode` when the org has picklists, the text fields otherwise. |
+| `You have uncommitted work pending. Please commit or rollback before calling out` | A test did DML and then a callout in the same transaction. | Wrap the callout in `Test.startTest()` / `Test.stopTest()`. |
+| `Delivered orders cannot go back to Placed` assertion fails | The admin running tests holds `Laheey_Integration`, whose `Bypass_Order_Status_Rules` custom permission switches the rule off. | The test runs as an ops user (`TestDataFactory.opsUser()`) with `System.runAs`. |
+
 ## Data loads
 
 | Symptom | Fix |

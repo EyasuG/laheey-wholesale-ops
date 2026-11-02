@@ -36,12 +36,14 @@ private class ControllersTest {
         Account a = [SELECT Id FROM Account LIMIT 1];
         update new Account(Id = a.Id, Warehouse_Id__c = 'ACC-MISSING');
         Test.setMock(HttpCalloutMock.class, new WarehouseHttpMock());
+        Test.startTest();   // new transaction: no callouts after uncommitted DML
         try {
             AccountHealthController.refreshFromWarehouse(a.Id);
             Assert.fail('Expected an error');
         } catch (AuraHandledException e) {
             Assert.isTrue(e.getMessage().contains('no account'), e.getMessage());
         }
+        Test.stopTest();
     }
 
     @IsTest
